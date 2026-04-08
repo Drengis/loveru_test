@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address Search FIAS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="search-container">
+        <h2>Поиск адреса (ФИАС 59)</h2>
+        <div class="input-group">
+            <input type="text" id="address-input" placeholder="Введите город, улицу или дом..." autocomplete="off">
+            <button id="select-btn">Выбрать</button>
+            <div id="autocomplete-list" class="autocomplete-items"></div>
+        </div>
+        <div id="result-display" class="result-box" style="display: none;">
+            <strong>Выбранный адрес:</strong>
+            <p id="selected-text"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
