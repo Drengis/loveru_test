@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -18,17 +19,24 @@ import (
 )
 
 const (
-	connStr   = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
 	fiasURL   = "https://fias-file.nalog.ru/downloads/2026.04.07/gar_xml.zip"
 	targetReg = "59"
 	batchSize = 5000
 	workers   = 12
 )
 
+func getConnStr() string {
+	host := os.Getenv("DB_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	return "postgres://postgres:postgres@" + host + ":5432/postgres?sslmode=disable"
+}
+
 func main() {
 	ctx := context.Background()
 
-	config, err := pgxpool.ParseConfig(connStr)
+	config, err := pgxpool.ParseConfig(getConnStr())
 	if err != nil {
 		log.Fatalf("Ошибка конфигурации БД: %v", err)
 	}

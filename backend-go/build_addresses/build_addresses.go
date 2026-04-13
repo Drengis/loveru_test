@@ -4,16 +4,23 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-const conn = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+func getConnStr() string {
+	host := os.Getenv("DB_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	return "postgres://postgres:postgres@" + host + ":5432/postgres?sslmode=disable"
+}
 
 func main() {
 	ctx := context.Background()
-	pool, err := pgxpool.New(ctx, conn)
+	pool, err := pgxpool.New(ctx, getConnStr())
 	if err != nil {
 		log.Fatalf("Ошибка подключения: %v", err)
 	}
