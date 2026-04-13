@@ -6,59 +6,79 @@
 
 ## Стек технологий
 
-- **Backend (Processing):** Go (Golang) + pgx  
-- **Backend (API):** PHP 8.x  
-- **Database:** PostgreSQL 15+ (с расширением `pg_trgm`)  
-- **Frontend:** Vanilla JS, CSS3, HTML5  
+- **Backend (Processing):** Go (Golang) + pgx
+- **Backend (API):** PHP 8.3 + Apache
+- **Database:** PostgreSQL 17 (с расширением `pg_trgm`)
+- **Frontend:** Vanilla JS, CSS3, HTML5
+- **Инфраструктура:** Docker, Docker Compose
 
 ---
 
-## Установка окружения
+## Быстрый старт (Docker)
 
-Установите:
-
-- Go: <https://go.dev/dl/>  
-- PHP: <https://www.php.net/downloads>  
-- PostgreSQL: <https://www.postgresql.org/download/>  
-
-## Проверка окружения
+Требуется только [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
 ```bash
-go version
-php -v
-psql --version
-```
-
-### 2. Клонирование и зависимости
-
-```bash
-git clone [https://github.com/Drengis/loveru_test](https://github.com/Drengis/loveru_test)
+git clone https://github.com/Drengis/loveru_test
 cd loveru_test
-go mod download
+docker compose up --build
 ```
 
-## Настройка БД
+### Что произойдёт автоматически:
 
-Создать базу в Postgres.
-Прописать доступы в public/config.php и в load_bd.go и build_addresses.go
+| Шаг | Контейнер | Описание |
+|---|---|---|
+| 1 | `postgres` | Запуск PostgreSQL |
+| 2 | `migrate` | Создание таблиц и индексов |
+| 3 | `load-bd` | Загрузка данных ФИАС (~час) |
+| 4 | `build-addresses` | Сборка полных адресов |
+| — | `web` | PHP сервер поиска (стартует сразу) |
 
-## Миграции и индексы
+После завершения загрузки данных сервис доступен по адресу:
+
+**http://localhost:8080**
+
+> Загрузка данных ФИАС (`load-bd`) занимает продолжительное время — идёт скачивание и парсинг большого ZIP-архива с сайта nalog.ru. Поисковый интерфейс будет доступен сразу, но результаты появятся только после завершения `load-bd` и `build-addresses`.
+
+---
+
+## Структура проекта
+
+```
+loveru_test/
+├── backend-go/
+│   ├── load_bd/          # Загрузка данных ФИАС в БД
+│   └── build_addresses/  # Сборка полных адресных строк
+├── backend-php/
+│   └── migrate.php       # Создание таблиц и индексов
+├── public/               # Фронтенд + PHP API поиска
+│   ├── index.html
+│   ├── index.php
+│   ├── script.js
+│   └── config.php
+└── docker/
+    ├── php/Dockerfile
+    └── go/Dockerfile
+```
+
+---
+
+## Ручной запуск (без Docker)
+
+Установите: Go, PHP, PostgreSQL.
+
+Пропишите параметры подключения в `public/config.php` и в константах `load_bd.go` / `build_addresses.go`.
 
 ```bash
+# Миграции
 php backend-php/migrate.php
-```
 
-## Импорт данных (Go)
-
-```bash
+# Загрузка данных ФИАС
 go run backend-go/load_bd/load_bd.go
+
+# Сборка адресов
 go run backend-go/build_addresses/build_addresses.go
-```
 
-## Запуск сервера
-
-```bash
+# Сервер
 php -S localhost:8000 -t public
 ```
-
-URL: <http://localhost:8000/index.php>
